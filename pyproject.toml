@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "growt-client"
+version = "0.2.0"
+description = "Python client for the Growt Transfer Oracle API"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [{name = "DroidTech", email = "support@transferoracle.ai"}]
+dependencies = ["requests>=2.28"]
+
+[project.optional-dependencies]
+rich = ["rich>=13.0"]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+include = ["growt_client*"]
