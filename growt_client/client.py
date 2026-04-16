@@ -154,6 +154,101 @@ class GrowtClient:
         )
 
     # ------------------------------------------------------------------
+    # Editability & Recovery (quantization-specific)
+    # ------------------------------------------------------------------
+
+    def editability_predict(
+        self,
+        features_original: list[list[float]],
+        labels: list[int | str],
+        features_compressed: list[list[float]],
+    ) -> dict:
+        """POST /v1/editability/predict — which classes are recoverable.
+
+        ``features_original`` and ``features_compressed`` must have the same
+        number of samples (paired, same order).
+
+        Returns per_class editability scores + ranking.
+        """
+        return self._post("/v1/editability/predict", {
+            "features_original": features_original,
+            "labels": labels,
+            "features_compressed": features_compressed,
+        })
+
+    def audit_safe_level(
+        self,
+        features_train: list[list[float]],
+        labels_train: list[int | str],
+        variants: dict[str, list[list[float]]],
+    ) -> dict:
+        """POST /v1/audit/safe-level — auto-pick safest quantization level.
+
+        Returns recommended_level, all_levels with per-variant safety, rationale.
+        """
+        return self._post("/v1/audit/safe-level", {
+            "features_train": features_train,
+            "labels_train": labels_train,
+            "variants": variants,
+        })
+
+    def audit_lora_recovery(
+        self,
+        features_train: list[list[float]],
+        labels_train: list[int | str],
+        features_fp32: list[list[float]],
+        features_quantized: list[list[float]],
+        features_lora: list[list[float]],
+    ) -> dict:
+        """POST /v1/audit/lora-recovery — three-way comparison.
+
+        Verdict: NO_DAMAGE / RECOVERABLE / PARTIALLY_RECOVERABLE / DESTRUCTIVE
+        """
+        return self._post("/v1/audit/lora-recovery", {
+            "features_train": features_train,
+            "labels_train": labels_train,
+            "features_fp32": features_fp32,
+            "features_quantized": features_quantized,
+            "features_lora": features_lora,
+        })
+
+    # ------------------------------------------------------------------
+    # Novelty Detection
+    # ------------------------------------------------------------------
+
+    def novelty_check(
+        self,
+        features_ref: list[list[float]],
+        features_new: list[list[float]],
+    ) -> dict:
+        """POST /v1/novelty/check — are new vectors familiar to reference?
+
+        Label-free. Returns scores, flagged_indices, stats.
+        """
+        return self._post("/v1/novelty/check", {
+            "features_ref": features_ref,
+            "features_new": features_new,
+        })
+
+    def novelty_drift(
+        self,
+        features_baseline: list[list[float]],
+        labels_baseline: list[int | str],
+        features_current: list[list[float]],
+        labels_current: list[int | str],
+    ) -> dict:
+        """POST /v1/novelty/drift — per-class centroid shift + spread change.
+
+        Returns per_class drift scores, overall_drift, alerts.
+        """
+        return self._post("/v1/novelty/drift", {
+            "features_baseline": features_baseline,
+            "labels_baseline": labels_baseline,
+            "features_current": features_current,
+            "labels_current": labels_current,
+        })
+
+    # ------------------------------------------------------------------
     # Monitor (real-time, sub-ms)
     # ------------------------------------------------------------------
 
